@@ -1,0 +1,166 @@
+<head>
+    <meta charset="UTF-8">
+    <title>YOUR PAGE TITLE</title>
+    <!-- ADD THIS BOOTSTRAP LINK -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="p-4 mb-4 bg-light rounded-3 shadow-sm">
+            <div class="container py-3 text-center">
+              <h1 class="display-5 fw-bold">Welcome back, {{ username.capitalize() }}!</h1>
+              <p class="fs-4">Let's crush your goals today! 🚶‍♂️🔥</p>
+            </div>
+          </div>
+        </div>
+      </div>      
+      
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+            <img src="{{ url_for('static', filename='company_logo.png') }}" alt="Logo" height="30" class="d-inline-block align-top">
+            Software Technology Group
+          </a>
+          <div>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('history') }}">History</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('totals') }}">Totals</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('graph') }}">Graph</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      
+      {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<h1>Welcome to Your Dashboard</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title">Monthly Step Goal</h4>
+        <p>Goal: {{ user_goal }} steps</p>
+        <p>You've walked <strong>{{ monthly_steps }}</strong> steps this month!</p>
+
+        <div class="progress" style="height: 30px;">
+            <div class="progress-bar bg-{{ progress_color }}" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+                {{ progress_percent }}% Complete
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">Enter Your Steps</h4>
+      <form method="POST" action="{{ url_for('dashboard') }}">
+          <div class="mb-3">
+              <label for="date" class="form-label">Date:</label>
+              <div class="input-group">
+                  <span class="input-group-text" id="calendar-icon">📅</span>
+                  <input type="date" id="date" name="date" class="form-control" aria-describedby="calendar-icon">
+              </div>
+          </div>
+  
+          <div class="mb-3">
+              <label for="steps" class="form-label">Steps:</label>
+              <input type="number" name="steps" class="form-control" required>
+          </div>
+  
+          <button type="submit" class="btn btn-primary">Submit Steps</button>
+      </form>
+    </div>
+  </div>  
+    
+
+{% if unlocked_badges %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h4 class="card-title">🏅 Milestones Achieved</h4>
+    <ul class="list-group list-group-flush">
+      {% for badge in unlocked_badges %}
+        <li class="list-group-item">{{ badge }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title">Update Monthly Goal</h4>
+
+        <form method="POST" action="{{ url_for('update_goal') }}">
+            <div class="mb-3">
+                <label for="goal" class="form-label">New Goal (steps):</label>
+                <input type="number" id="goal" name="goal" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Goal</button>
+        </form>
+    </div>
+</div>
+
+    
+    </form>
+
+    <script>
+        window.onload = function() {
+          if (!document.getElementById('date').value) {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+          }
+        };
+      </script>
+
+<script>
+    window.onload = function() {
+      const progressPercent = {{ progress_percent }};
+      
+      if (progressPercent >= 100) {
+        // 🎉 Trigger Confetti Party!
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 }
+        });
+  
+        // Optional: also show a big alert!
+        setTimeout(function() {
+          alert('🏆 Congratulations! You reached your monthly goal!');
+        }, 500);
+      }
+    };
+  </script>
+  
+
+    <h2>Navigation</h2>
+    <ul>
+        <li><a href="{{ url_for('history') }}">View Step History</a></li>
+        <li><a href="{{ url_for('totals') }}">View Total Steps</a></li>
+        <li><a href="{{ url_for('leaderboard') }}">View Leaderboard</a></li>
+        <li><a href="{{ url_for('graph') }}">View Step Graph</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+</body>
+</html>
